@@ -137,6 +137,7 @@ namespace MyApp.Namespace
         {
             try
             {
+                System.Console.WriteLine("I am hitteddd");
                 string role = User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
                 string claimId = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
                 int villageId = Convert.ToInt32(claimId);
