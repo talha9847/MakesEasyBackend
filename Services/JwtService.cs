@@ -20,6 +20,7 @@ namespace MakesEasy.Services
 
         public string GenerateJwtToken(UserModel user)
         {
+            System.Console.WriteLine("i amn hrer kjdsflkjds ", user.Id, user.FirstName, user.DistId);
             var role = user.Role.StartsWith("Admin") ? "Admin" : "User";
             var claims = new List<Claim>
             {
