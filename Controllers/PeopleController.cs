@@ -141,6 +141,8 @@ namespace MyApp.Namespace
                 string role = User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
                 string claimId = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
                 int villageId = Convert.ToInt32(claimId);
+                System.Console.WriteLine(role);
+                System.Console.WriteLine(claimId);
                 var count = await _peopleRepo.GetCount(role, villageId);
                 if (count != null)
                 {
