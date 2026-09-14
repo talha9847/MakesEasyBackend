@@ -492,7 +492,8 @@ namespace MakesEasy.Services
 
     public async Task SendOTPAsync(string email, string otp)
     {
-
+      var username = Environment.GetEnvironmentVariable("EMAIL_USERNAME");
+      var password = Environment.GetEnvironmentVariable("EMAIL_PASSWORD");
       try
       {
 
@@ -500,7 +501,7 @@ namespace MakesEasy.Services
         {
           Port = 443,
           EnableSsl = true,
-          Credentials = new NetworkCredential("cse.210840131054@gmail.com", "rbwiaxmdusnfaspp") // Use App Password
+          Credentials = new NetworkCredential(username, password) // Use App Password
         };
 
         string plainTextBody = $"Hello,\n\n" +
