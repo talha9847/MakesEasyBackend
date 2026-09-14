@@ -6,29 +6,34 @@ using System.Net.Mail;
 using System.Threading.Tasks;
 using System.Text;
 using Npgsql;
+using System.Diagnostics;
 
 namespace MakesEasy.Services
 {
-    public class EmailService
+  public class EmailService
+  {
+    public async Task<int> SendEmail(string email, string subject, string resetLink)
     {
-        public async Task<int> SendEmail(string email, string subject, string resetLink)
+      try
+      {
+        var sw = Stopwatch.StartNew();
+
+        Console.WriteLine("1. Creating SMTP client");
+
+        var smtpClient = new SmtpClient("smtp.gmail.com")
         {
-            try
-            {
-                var smtpClient = new SmtpClient("smtp.gmail.com")
-                {
-                    Port = 587,
-                    EnableSsl = true,
-                    Credentials = new NetworkCredential("cse.210840131054@gmail.com", "rbwiaxmdusnfaspp") // Use App Password
-                };
+          Port = 587,
+          EnableSsl = true,
+          Credentials = new NetworkCredential("cse.210840131054@gmail.com", "rbwiaxmdusnfaspp") // Use App Password
+        };
 
-                string plainTextBody = $"Hello,\n\nYou requested to reset your Makes Easy password.\n\n" +
-                                       $"Click the link to reset your password: {resetLink}\n\n" +
-                                       $"This link will expire in 30 minutes.\n\n" +
-                                       $"If you didn't request this, you can safely ignore this email.\n\n" +
-                                       $"Best regards,\nThe Makes Easy Team\n© {DateTime.UtcNow.Year} Makes Easy.";
+        string plainTextBody = $"Hello,\n\nYou requested to reset your Makes Easy password.\n\n" +
+                               $"Click the link to reset your password: {resetLink}\n\n" +
+                               $"This link will expire in 30 minutes.\n\n" +
+                               $"If you didn't request this, you can safely ignore this email.\n\n" +
+                               $"Best regards,\nThe Makes Easy Team\n© {DateTime.UtcNow.Year} Makes Easy.";
 
-                string htmlBody = $@" <!DOCTYPE html>
+        string htmlBody = $@" <!DOCTYPE html>
 <html lang=""en"">
   <head>
     <meta charset=""UTF-8"" />
@@ -452,58 +457,61 @@ namespace MakesEasy.Services
 </html>
 ";
 
-                var message = new MailMessage
-                {
-                    From = new MailAddress("cse.210840131054@gmail.com", "Makes Easy Support"),
-                    Subject = subject,
-                    IsBodyHtml = true,
-                    Body = htmlBody,
-                    BodyEncoding = Encoding.UTF8
-                };
-
-                message.To.Add(email);
-                message.ReplyToList.Add(new MailAddress("support@makeseasy.in"));
-
-                var plainView = AlternateView.CreateAlternateViewFromString(plainTextBody, Encoding.UTF8, "text/plain");
-                message.AlternateViews.Add(plainView);
-
-                var htmlView = AlternateView.CreateAlternateViewFromString(htmlBody, Encoding.UTF8, "text/html");
-                message.AlternateViews.Add(htmlView);
-
-                await smtpClient.SendMailAsync(message);
-                return 1;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Email send error: " + ex.Message);
-                return 0;
-            }
-        }
-
-
-
-        public async Task SendOTPAsync(string email, string otp)
+        var message = new MailMessage
         {
+          From = new MailAddress("cse.210840131054@gmail.com", "Makes Easy Support"),
+          Subject = subject,
+          IsBodyHtml = true,
+          Body = htmlBody,
+          BodyEncoding = Encoding.UTF8
+        };
 
-            try
-            {
+        message.To.Add(email);
+        message.ReplyToList.Add(new MailAddress("support@makeseasy.in"));
 
-                var smtpClient = new SmtpClient("smtp.gmail.com")
-                {
-                    Port = 587,
-                    EnableSsl = true,
-                    Credentials = new NetworkCredential("cse.210840131054@gmail.com", "rbwiaxmdusnfaspp") // Use App Password
-                };
+        var plainView = AlternateView.CreateAlternateViewFromString(plainTextBody, Encoding.UTF8, "text/plain");
+        message.AlternateViews.Add(plainView);
 
-                string plainTextBody = $"Hello,\n\n" +
-                                $"You requested an OTP to verify your identity in Makes Easy.\n\n" +
-                                $"Your OTP is: {otp}\n\n" +
-                                $"This OTP will expire in 30 minutes.\n\n" +
-                                $"If you did not request this, you can safely ignore this email.\n\n" +
-                                $"Best regards,\nThe Makes Easy Team\n© {DateTime.UtcNow.Year} Makes Easy.";
+        var htmlView = AlternateView.CreateAlternateViewFromString(htmlBody, Encoding.UTF8, "text/html");
+        message.AlternateViews.Add(htmlView);
+
+        await smtpClient.SendMailAsync(message);
+        Console.WriteLine(
+   $"4. Email sent: {sw.ElapsedMilliseconds} ms"
+);
+        return 1;
+      }
+      catch (Exception ex)
+      {
+        Console.WriteLine("Email send error: " + ex.Message);
+        return 0;
+      }
+    }
 
 
-                string htmlBody = $@"<!DOCTYPE html>
+
+    public async Task SendOTPAsync(string email, string otp)
+    {
+
+      try
+      {
+
+        var smtpClient = new SmtpClient("smtp.gmail.com")
+        {
+          Port = 587,
+          EnableSsl = true,
+          Credentials = new NetworkCredential("cse.210840131054@gmail.com", "rbwiaxmdusnfaspp") // Use App Password
+        };
+
+        string plainTextBody = $"Hello,\n\n" +
+                        $"You requested an OTP to verify your identity in Makes Easy.\n\n" +
+                        $"Your OTP is: {otp}\n\n" +
+                        $"This OTP will expire in 30 minutes.\n\n" +
+                        $"If you did not request this, you can safely ignore this email.\n\n" +
+                        $"Best regards,\nThe Makes Easy Team\n© {DateTime.UtcNow.Year} Makes Easy.";
+
+
+        string htmlBody = $@"<!DOCTYPE html>
 <html lang=""en"">
   <head>
     <meta charset=""UTF-8"" />
@@ -910,34 +918,34 @@ namespace MakesEasy.Services
   </body>
 </html>";
 
-                var message = new MailMessage
-                {
-                    From = new MailAddress("cse.210840131054@gmail.com", "Makes Easy Support"),
-                    Subject = "Verify Otp",
-                    IsBodyHtml = true,
-                    Body = htmlBody,
-                    BodyEncoding = Encoding.UTF8
-                };
+        var message = new MailMessage
+        {
+          From = new MailAddress("cse.210840131054@gmail.com", "Makes Easy Support"),
+          Subject = "Verify Otp",
+          IsBodyHtml = true,
+          Body = htmlBody,
+          BodyEncoding = Encoding.UTF8
+        };
 
-                message.To.Add(email);
-                message.ReplyToList.Add(new MailAddress("support@makeseasy.in"));
+        message.To.Add(email);
+        message.ReplyToList.Add(new MailAddress("support@makeseasy.in"));
 
-                var plainView = AlternateView.CreateAlternateViewFromString(plainTextBody, Encoding.UTF8, "text/plain");
-                message.AlternateViews.Add(plainView);
+        var plainView = AlternateView.CreateAlternateViewFromString(plainTextBody, Encoding.UTF8, "text/plain");
+        message.AlternateViews.Add(plainView);
 
-                var htmlView = AlternateView.CreateAlternateViewFromString(htmlBody, Encoding.UTF8, "text/html");
-                message.AlternateViews.Add(htmlView);
+        var htmlView = AlternateView.CreateAlternateViewFromString(htmlBody, Encoding.UTF8, "text/html");
+        message.AlternateViews.Add(htmlView);
 
-                await smtpClient.SendMailAsync(message);
+        await smtpClient.SendMailAsync(message);
 
-            }
-            catch (System.Exception)
-            {
+      }
+      catch (System.Exception)
+      {
 
-                throw;
-            }
+        throw;
+      }
 
-        }
     }
+  }
 }
 
