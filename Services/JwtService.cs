@@ -25,6 +25,10 @@ namespace MakesEasy.Services
             Console.WriteLine($"Role: {user.Role}");
             Console.WriteLine($"FirstName: {user.FirstName}");
             Console.WriteLine($"DistId: {user.DistId}");
+            Console.WriteLine($"VilageId: {user.VillageId}");
+            Console.WriteLine($"TalukaId: {user.TalukaId}");
+            Console.WriteLine($"StateId: {user.StateId}");
+            Console.WriteLine($"CountryId: {user.CountryId}");
             Console.WriteLine(
                 "I am here | Id: {0} | Role: {1} | FirstName: {2} | DistId: {3}",
                 user.Id,
