@@ -332,7 +332,7 @@ namespace MyApp.Namespace
                 return StatusCode(500, new { message = "Error while generating token." });
 
             }
-            var resetLink = $"http://localhost:5173/updatepassword?token={token}";
+            var resetLink = $"https://makeseasy.in/updatepassword?token={token}";
 
 
             await _emailService.SendEmail(email, "Reset Your Password", resetLink);
