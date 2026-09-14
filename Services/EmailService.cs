@@ -483,7 +483,15 @@ namespace MakesEasy.Services
       }
       catch (Exception ex)
       {
-        Console.WriteLine("Email send error: " + ex.Message);
+        Console.WriteLine("========== EMAIL SEND FAILED ==========");
+        Console.WriteLine(ex.ToString());
+
+        if (ex.InnerException != null)
+        {
+          Console.WriteLine("========== INNER EXCEPTION ==========");
+          Console.WriteLine(ex.InnerException.ToString());
+        }
+
         return 0;
       }
     }
