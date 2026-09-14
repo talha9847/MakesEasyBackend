@@ -7,13 +7,58 @@ using System.Threading.Tasks;
 using System.Text;
 using Npgsql;
 using System.Diagnostics;
-
+using System.Net.Http.Headers;
+using System.Text.Json;
+using System.Net.Http;
 namespace MakesEasy.Services
 {
   public class EmailService
   {
+    private static readonly HttpClient _httpClient = new HttpClient
+    {
+      BaseAddress = new Uri("https://api.resend.com/")
+    };
+
+    private async Task<bool> SendViaResendAsync(string toEmail, string subject, string htmlBody, string plainTextBody)
+    {
+      var apiKey = Environment.GetEnvironmentVariable("RESEND_API_KEY");
+
+      var payload = new
+      {
+        from = "Makes Easy <support@makeseasy.in>", // must be a verified domain in Resend
+        to = new[] { toEmail },
+        reply_to = "support@makeseasy.in",
+        subject = subject,
+        html = htmlBody,
+        text = plainTextBody
+      };
+
+      var json = JsonSerializer.Serialize(payload);
+      var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+      var request = new HttpRequestMessage(HttpMethod.Post, "emails")
+      {
+        Content = content
+      };
+      request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+
+      var response = await _httpClient.SendAsync(request);
+
+      if (!response.IsSuccessStatusCode)
+      {
+        var error = await response.Content.ReadAsStringAsync();
+        Console.WriteLine("========== EMAIL SEND FAILED ==========");
+        Console.WriteLine($"Status: {response.StatusCode}, Body: {error}");
+        return false;
+      }
+
+      return true;
+    }
+
     public async Task<int> SendEmail(string email, string subject, string resetLink)
     {
+      var username = Environment.GetEnvironmentVariable("EMAIL_USERNAME");
+      var password = Environment.GetEnvironmentVariable("EMAIL_PASSWORD");
       try
       {
         var sw = Stopwatch.StartNew();
@@ -24,7 +69,7 @@ namespace MakesEasy.Services
         {
           Port = 587,
           EnableSsl = true,
-          Credentials = new NetworkCredential("cse.210840131054@gmail.com", "rbwiaxmdusnfaspp") // Use App Password
+          Credentials = new NetworkCredential(username, password) // Use App Password
         };
 
         string plainTextBody = $"Hello,\n\nYou requested to reset your Makes Easy password.\n\n" +
@@ -457,29 +502,11 @@ namespace MakesEasy.Services
 </html>
 ";
 
-        var message = new MailMessage
-        {
-          From = new MailAddress("cse.210840131054@gmail.com", "Makes Easy Support"),
-          Subject = subject,
-          IsBodyHtml = true,
-          Body = htmlBody,
-          BodyEncoding = Encoding.UTF8
-        };
 
-        message.To.Add(email);
-        message.ReplyToList.Add(new MailAddress("support@makeseasy.in"));
+        var success = await SendViaResendAsync(email, subject, htmlBody, plainTextBody);
 
-        var plainView = AlternateView.CreateAlternateViewFromString(plainTextBody, Encoding.UTF8, "text/plain");
-        message.AlternateViews.Add(plainView);
+        return success ? 1 : 0;
 
-        var htmlView = AlternateView.CreateAlternateViewFromString(htmlBody, Encoding.UTF8, "text/html");
-        message.AlternateViews.Add(htmlView);
-
-        await smtpClient.SendMailAsync(message);
-        Console.WriteLine(
-   $"4. Email sent: {sw.ElapsedMilliseconds} ms"
-);
-        return 1;
       }
       catch (Exception ex)
       {
@@ -927,25 +954,8 @@ namespace MakesEasy.Services
   </body>
 </html>";
 
-        var message = new MailMessage
-        {
-          From = new MailAddress("cse.210840131054@gmail.com", "Makes Easy Support"),
-          Subject = "Verify Otp",
-          IsBodyHtml = true,
-          Body = htmlBody,
-          BodyEncoding = Encoding.UTF8
-        };
+        await SendViaResendAsync(email, "Verify Otp", htmlBody, plainTextBody);
 
-        message.To.Add(email);
-        message.ReplyToList.Add(new MailAddress("support@makeseasy.in"));
-
-        var plainView = AlternateView.CreateAlternateViewFromString(plainTextBody, Encoding.UTF8, "text/plain");
-        message.AlternateViews.Add(plainView);
-
-        var htmlView = AlternateView.CreateAlternateViewFromString(htmlBody, Encoding.UTF8, "text/html");
-        message.AlternateViews.Add(htmlView);
-
-        await smtpClient.SendMailAsync(message);
 
       }
       catch (System.Exception)
