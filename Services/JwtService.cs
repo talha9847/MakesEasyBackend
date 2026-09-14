@@ -20,7 +20,18 @@ namespace MakesEasy.Services
 
         public string GenerateJwtToken(UserModel user)
         {
-            System.Console.WriteLine("i amn hrer kjdsflkjds ", user.Id, user.FirstName, user.DistId);
+            Console.WriteLine("========== GenerateJwtToken START ==========");
+            Console.WriteLine($"Id: {user.Id}");
+            Console.WriteLine($"Role: {user.Role}");
+            Console.WriteLine($"FirstName: {user.FirstName}");
+            Console.WriteLine($"DistId: {user.DistId}");
+            Console.WriteLine(
+                "I am here | Id: {0} | Role: {1} | FirstName: {2} | DistId: {3}",
+                user.Id,
+                user.Role,
+                user.FirstName,
+                user.DistId
+            );
             var role = user.Role.StartsWith("Admin") ? "Admin" : "User";
             var claims = new List<Claim>
             {
