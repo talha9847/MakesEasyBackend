@@ -194,7 +194,7 @@ namespace MyApp.Namespace
                 {
                     HttpOnly = true,
                     Secure = true,
-                    SameSite = SameSiteMode.Strict,
+                    SameSite = SameSiteMode.None,
                     Expires = DateTime.UtcNow.AddDays(30)
                 });
 
