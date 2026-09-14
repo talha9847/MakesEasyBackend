@@ -183,6 +183,11 @@ namespace MyApp.Namespace
                     user.Role = role;
                 }
 
+                System.Console.WriteLine(user.FirstName);
+                System.Console.WriteLine(user.CountryId);
+
+                System.Console.WriteLine("kldjfl;kd sj;lkjd ;lkfjs");
+
                 var authToken = _jwtService.GenerateJwtToken(user);
 
                 HttpContext.Response.Cookies.Append("AuthToken", authToken, new CookieOptions
