@@ -499,7 +499,7 @@ namespace MakesEasy.Services
 
         var smtpClient = new SmtpClient("smtp.gmail.com")
         {
-          Port = 443,
+          Port = 587,
           EnableSsl = true,
           Credentials = new NetworkCredential(username, password) // Use App Password
         };
