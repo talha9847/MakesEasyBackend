@@ -84,7 +84,7 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins(
                 "http://localhost:5173",
-                "https://makes-easy-frontend.vercel.app"
+                "https://makes-easy-frontend.vercel.app", "https://makeseasy.in", "www.makeseasy.in"
               )
               .AllowAnyHeader()
               .AllowAnyMethod()
