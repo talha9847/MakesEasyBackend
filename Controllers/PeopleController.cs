@@ -137,6 +137,12 @@ namespace MyApp.Namespace
         {
             try
             {
+                foreach (var claim in User.Claims)
+                {
+                    Console.WriteLine($"CLAIM TYPE: [{claim.Type}]");
+                    Console.WriteLine($"CLAIM VALUE: [{claim.Value}]");
+                }
+                
                 System.Console.WriteLine("I am hitteddd");
                 string role = User.Claims.FirstOrDefault(c => c.Type == "type")?.Value;
                 string claimId = User.Claims.FirstOrDefault(c => c.Type == "id")?.Value;
